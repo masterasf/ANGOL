@@ -150,6 +150,56 @@ window.VOCAB_SETS["angielski-szkola"] = {
   ]
 };
 
+window.VOCAB_SETS["angielski-powtorka"] = {
+  id: "angielski-powtorka",
+  title: "Powtórka",
+  emoji: "🔁",
+  description: "Wybrane słówka do powtórki z różnych zestawów",
+  color: "#c084fc",
+  words: [
+    ["fall behind with","mieć zaległości"],
+    ["get hold of sb","złapać kogoś"],
+    ["go on to do sth","dalej robić coś"],
+    ["live up to expectations","spełniać oczekiwania"],
+    ["have an extensive vocabulary","posiadać bogate słownictwo"],
+    ["recall people's names","przypominać sobie imiona ludzi"],
+    ["distract","rozpraszać"],
+    ["acquire a second language","opanować drugi język"],
+    ["retirement","przejście na emeryturę"],
+    ["adolescence","wiek dojrzewania"],
+    ["be justified","być uzasadnionym"],
+    ["admittedly","wprawdzie"],
+    ["basically","w zasadzie"],
+    ["interestingly","co ciekawe"],
+    ["ideally","najlepiej by było"],
+    ["obviously","oczywiście"],
+    ["cram","wkuwać"],
+    ["set square","ekierka"],
+    ["fineliner pen","cienkopis"],
+    ["be tutored","brać korepetycje"],
+    ["correction tape","korektor w taśmie"],
+    ["protractor","kątomierz"],
+    ["ring binder","segregator"],
+    ["design and technology","technika"],
+    ["drawing pins","pinezki"],
+    ["hole punch","dziurkacz"],
+    ["humanities","nauki humanistyczne"],
+    ["stapler","zszywacz"],
+    ["capitalise on sth","skorzystać z czegoś"],
+    ["be natural","mieć wrodzone zdolności"],
+    ["superior","lepszy ponad przeciętny"],
+    ["fulfil your potential","wykorzystać swój potencjał"],
+    ["push your boundaries","przekraczaj swoje granice"],
+    ["show leadership","wykazywać cechy przywódcze"],
+    ["cultural identity","tożsamość kulturowa"],
+    ["think outside the box","myśleć nieszablonowo"],
+    ["sense of belonging","poczucie przynależności"],
+    ["have strict self-control","mieć dobrą samokontrolę"],
+    ["build rapport","budować relacje"],
+    ["self-esteem","poczucie własnej wartości"]
+  ]
+};
+
 window.VOCAB_SETS["angielski-tozsamosc"] = {
   id: "angielski-tozsamosc",
   title: "Tożsamość i rozwój",
