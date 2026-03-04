@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiLearn — Nauka Słówek</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1825;
+    --surface2: #231f35;
+    --accent: #ff6b6b;
+    --accent2: #ffd93d;
+    --accent3: #6bcb77;
+    --text: #fffffe;
+    --text2: #a7a9be;
+    --border: #2e2a45;
+    --correct: #6bcb77;
+    --wrong: #ff6b6b;
+    --hint: #ffd93d;
+    --card-radius: 20px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Nunito', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  .theme-ocean {
+    --bg: #0a1628;
+    --surface: #112240;
+    --surface2: #1a3356;
+    --accent: #64ffda;
+    --accent2: #f7c59f;
+    --accent3: #64ffda;
+    --text: #ccd6f6;
+    --text2: #8892b0;
+    --border: #233554;
+    --correct: #64ffda;
+    --wrong: #ff6b6b;
+    --hint: #f7c59f;
+  }
+
+  .theme-forest {
+    --bg: #0d1f0d;
+    --surface: #162716;
+    --surface2: #1e3a1e;
+    --accent: #a8e063;
+    --accent2: #f7dc6f;
+    --accent3: #56ab2f;
+    --text: #e8f5e9;
+    --text2: #81c784;
+    --border: #2e5e2e;
+    --correct: #a8e063;
+    --wrong: #ef9a9a;
+    --hint: #f7dc6f;
+  }
+
+  .theme-candy {
+    --bg: #ffeef8;
+    --surface: #fff0fb;
+    --surface2: #ffe4f7;
+    --accent: #e91e8c;
+    --accent2: #7c3aed;
+    --accent3: #059669;
+    --text: #1a001a;
+    --text2: #6b3070;
+    --border: #f0b8e0;
+    --correct: #059669;
+    --wrong: #dc2626;
+    --hint: #d97706;
+  }
+
+  .theme-sunset {
+    --bg: #1a0a00;
+    --surface: #2d1500;
+    --surface2: #3d1f00;
+    --accent: #ff8c42;
+    --accent2: #ffe66d;
+    --accent3: #ff6b6b;
+    --text: #fff8f0;
+    --text2: #c4956a;
+    --border: #5c3010;
+    --correct: #7ec8a0;
+    --wrong: #ff6b6b;
+    --hint: #ffe66d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: all 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND DECORATION */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px;
+    left: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent2) 10%, transparent) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .logo span { color: var(--accent); }
+
+  .theme-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .theme-picker label {
+    font-size: 0.75rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .theme-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .theme-btn:hover, .theme-btn.active { transform: scale(1.2); border-color: var(--text); }
+  .theme-btn.t-dark { background: linear-gradient(135deg, #ff6b6b, #ffd93d); }
+  .theme-btn.t-ocean { background: linear-gradient(135deg, #64ffda, #0a1628); }
+  .theme-btn.t-forest { background: linear-gradient(135deg, #56ab2f, #a8e063); }
+  .theme-btn.t-candy { background: linear-gradient(135deg, #e91e8c, #7c3aed); }
+  .theme-btn.t-sunset { background: linear-gradient(135deg, #ff8c42, #ffe66d); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .dot-green { background: var(--correct); }
+  .dot-red { background: var(--wrong); }
+  .dot-yellow { background: var(--hint); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--surface);
+    border-radius: 100px;
+    height: 8px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* MODE SELECTOR */
+  .mode-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border-radius: var(--card-radius);
+    padding: 6px;
+    border: 1px solid var(--border);
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .mode-btn.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 36px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .question-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text2);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .question-counter {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    float: right;
+  }
+
+  .question-text {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .direction-badge {
+    display: inline-block;
+    background: color-mix(in srgb, var(--accent2) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent2) 30%, transparent);
+    color: var(--accent2);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  /* HINTS */
+  .hints-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+    min-height: 32px;
+  }
+  .hint-letter {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: color-mix(in srgb, var(--hint) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--hint) 30%, transparent);
+    color: var(--hint);
+    border-radius: 6px;
+    padding: 4px 8px;
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .hint-label {
+    font-size: 0.72rem;
+    color: var(--hint);
+    font-weight: 700;
+    align-self: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* WRITE MODE */
+  .write-input-wrap {
+    position: relative;
+    margin-top: 20px;
+  }
+  .write-input {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .write-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+  .write-input.correct {
+    border-color: var(--correct);
+    background: color-mix(in srgb, var(--correct) 10%, var(--surface2));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--correct) 15%, transparent);
+  }
+  .write-input.wrong {
+    border-color: var(--wrong);
+    background: color-mix(in srgb, var(--wrong) 10%, var(--surface2));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--wrong) 15%, transparent);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  .check-btn {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .check-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .check-btn:active { transform: translateY(0); }
+
+  /* MULTIPLE CHOICE */
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  @media (max-width: 500px) { .choices { grid-template-columns: 1fr; } }
+
+  .choice-btn {
+    padding: 16px 20px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .choice-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .choice-btn:hover:not(:disabled)::before { opacity: 0.08; }
+  .choice-btn:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-2px); }
+  .choice-btn.correct-choice {
+    border-color: var(--correct);
+    background: color-mix(in srgb, var(--correct) 15%, var(--surface2));
+    color: var(--correct);
+    font-weight: 800;
+  }
+  .choice-btn.wrong-choice {
+    border-color: var(--wrong);
+    background: color-mix(in srgb, var(--wrong) 15%, var(--surface2));
+    color: var(--wrong);
+    animation: shake 0.4s ease;
+  }
+  .choice-btn:disabled { cursor: not-allowed; }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 14px;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+  }
+  .feedback.show { display: flex; }
+  .feedback.correct-fb {
+    background: color-mix(in srgb, var(--correct) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--correct) 30%, transparent);
+    color: var(--correct);
+  }
+  .feedback.wrong-fb {
+    background: color-mix(in srgb, var(--wrong) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--wrong) 30%, transparent);
+    color: var(--wrong);
+  }
+  .feedback-icon { font-size: 1.4rem; }
+  .correct-answer-text { font-family: var(--font-mono); font-weight: 500; }
+
+  /* NEXT BTN */
+  .next-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    color: var(--accent);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    margin-top: 12px;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:hover { background: var(--accent); color: #fff; }
+
+  /* COMPLETE SCREEN */
+  .complete-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    position: relative;
+    overflow: hidden;
+  }
+  .complete-screen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+  .complete-screen.show { display: block; animation: slideIn 0.4s ease; }
+  .complete-emoji { font-size: 4rem; margin-bottom: 20px; }
+  .complete-title {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+  }
+  .complete-score {
+    font-size: 1.1rem;
+    color: var(--text2);
+    margin-bottom: 32px;
+  }
+  .score-big {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .restart-btn {
+    padding: 14px 40px;
+    background: var(--accent);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .restart-btn:hover { transform: translateY(-2px); }
+
+  /* DIRECTION TOGGLE */
+  .dir-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .dir-btn {
+    padding: 7px 16px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .dir-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .confetti-wrap {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 100;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">Lexi<span>Learn</span></div>
+    <div class="theme-picker">
+      <label>Motyw</label>
+      <button class="theme-btn t-dark active" onclick="setTheme('')" title="Ciemny"></button>
+      <button class="theme-btn t-ocean" onclick="setTheme('ocean')" title="Ocean"></button>
+      <button class="theme-btn t-forest" onclick="setTheme('forest')" title="Las"></button>
+      <button class="theme-btn t-candy" onclick="setTheme('candy')" title="Candy"></button>
+      <button class="theme-btn t-sunset" onclick="setTheme('sunset')" title="Zachód słońca"></button>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><span class="dot dot-green"></span><span id="stat-correct">0</span> poprawnych</div>
+    <div class="stat-pill"><span class="dot dot-red"></span><span id="stat-wrong">0</span> błędów</div>
+    <div class="stat-pill"><span class="dot dot-yellow"></span><span id="stat-remain">0</span> pozostało</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <div class="mode-selector">
+    <button class="mode-btn active" onclick="setMode('write')">✏️ Pisanie</button>
+    <button class="mode-btn" onclick="setMode('choice')">🎯 Wybór odpowiedzi</button>
+  </div>
+
+  <div class="dir-toggle">
+    <button class="dir-btn active" onclick="setDir('en-pl')">🇬🇧 → 🇵🇱 Angielski → Polski</button>
+    <button class="dir-btn" onclick="setDir('pl-en')">🇵🇱 → 🇬🇧 Polski → Angielski</button>
+  </div>
+
+  <!-- QUESTION CARD -->
+  <div class="card" id="question-card">
+    <div class="question-label">
+      Przetłumacz słówko
+      <span class="question-counter" id="q-counter">1 / 100</span>
+    </div>
+    <div class="direction-badge" id="dir-badge">Angielski → Polski</div>
+    <div class="question-text" id="question-text">Loading...</div>
+
+    <!-- WRITE MODE -->
+    <div id="write-mode">
+      <div class="write-input-wrap">
+        <input class="write-input" id="write-input" type="text" placeholder="Wpisz odpowiedź..." autocomplete="off" spellcheck="false">
+      </div>
+      <button class="check-btn" onclick="checkWrite()">Sprawdź →</button>
+      <div class="feedback" id="write-feedback">
+        <span class="feedback-icon"></span>
+        <span class="feedback-text"></span>
+      </div>
+      <div class="hints-row" id="hints-row"></div>
+    </div>
+
+    <!-- CHOICE MODE -->
+    <div id="choice-mode" style="display:none">
+      <div class="choices" id="choices-grid"></div>
+      <div class="feedback" id="choice-feedback">
+        <span class="feedback-icon"></span>
+        <span class="feedback-text"></span>
+      </div>
+      <div class="hints-row" id="hints-row-choice"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Następne →</button>
+  </div>
+
+  <!-- COMPLETE SCREEN -->
+  <div class="complete-screen" id="complete-screen">
+    <div class="complete-emoji">🎉</div>
+    <div class="complete-title">Brawo!</div>
+    <div class="complete-score">Wynik: <span class="score-big" id="final-score">0%</span></div>
+    <p class="complete-score" style="margin-bottom:32px">Poprawne: <strong id="final-correct">0</strong> / <strong id="final-total">0</strong></p>
+    <button class="restart-btn" onclick="restart()">🔄 Zacznij od nowa</button>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<script>
+const VOCAB = [
+  ["attempt to do something","próba zrobienia czegoś"],
+  ["be a boost to someone's confidence","podnieść komuś samoocenę"],
+  ["be capable of doing sth","być zdolnym do zrobienia czegoś"],
+  ["be hopeless at","być beznadziejnym w"],
+  ["be motivated","być zmotywowanym"],
+  ["come naturally to someone","przychodzić komuś naturalnie"],
+  ["focus your attention on","skupić swoją uwagę na"],
+  ["fulfil a dream","spełnić marzenie"],
+  ["gain experience","zdobywać doświadczenie"],
+  ["get the feel of","wyczuć coś"],
+  ["go downhill","pogarszać się"],
+  ["have the potential to","mieć potencjał"],
+  ["inspire someone","zainspirować kogoś"],
+  ["make all the difference","zrobić różnicę"],
+  ["master","opanować"],
+  ["not getting anywhere","utknąć w miejscu"],
+  ["overcome a problem","przezwyciężyć problem"],
+  ["pick up the basics","nauczyć się podstaw"],
+  ["put the theory into practice","zastosować teorię w praktyce"],
+  ["that's always a plus","to zawsze plus"],
+  ["watch online tutorials","oglądać samouczki online"],
+  ["catch up on","nadrabiać"],
+  ["come across","natknąć się"],
+  ["drop out","rzucić"],
+  ["figure out","zrozumieć"],
+  ["go on to do sth","dalej robić coś"],
+  ["go through","zapoznać się z czymś dokładnie"],
+  ["live up to expectations","spełniać oczekiwania"],
+  ["pick up","podłapać umiejętność"],
+  ["absorb information","przyswajać informacje"],
+  ["acquire a second language","opanować drugi język"],
+  ["adolescence","wiek dojrzewania"],
+  ["adulthood","dorosłość"],
+  ["be wise","być mądrym"],
+  ["distract","rozpraszać"],
+  ["have an extensive vocabulary","posiadać bogate słownictwo"],
+  ["in middle age","w średnim wieku"],
+  ["in your late teens","w wieku 18-19"],
+  ["mature","dojrzały"],
+  ["mental arithmetic","arytmetyka mentalna"],
+  ["recall people's names","przypominać sobie imiona ludzi"],
+  ["retirement","przejście na emeryturę"],
+  ["the older generation","starsze pokolenie"],
+  ["get hold of sb","złapać kogoś"],
+  ["get into sth","zainteresować się czymś"],
+  ["get off work","wyjść z pracy"],
+  ["get out","wyjść"],
+  ["get someone","odebrać kogoś"],
+  ["get to know","dowiedzieć się"],
+  ["assertive","asertywny"],
+  ["be justified","być uzasadnionym"],
+  ["criticism","krytyka"],
+  ["judgment","ocena sytuacji"],
+  ["lose your temper","stracić panowanie"],
+  ["maintain relationship","utrzymywać relacje"],
+  ["perspective","perspektywa"],
+  ["state of mind","stan umysłu"],
+  ["admittedly","wprawdzie"],
+  ["amazingly","zadziwiająco"],
+  ["basically","w zasadzie"],
+  ["hopefully","miejmy nadzieję"],
+  ["ideally","najlepiej by było"],
+  ["interestingly","co ciekawe"],
+  ["obviously","oczywiście"],
+  ["personally","osobiście"],
+  ["surprisingly","zaskakująco"],
+  ["unfortunately","niestety"],
+  ["be expelled","zostać wydalonym"],
+  ["be off school","być poza szkołą"],
+  ["be tutored","brać korepetycje"],
+  ["citizenship","obywatelstwo"],
+  ["correction tape","korektor w taśmie"],
+  ["clipboard","podkładka z klipsem"],
+  ["compass","cyrkiel"],
+  ["cram","wkuwać"],
+  ["design and technology","technika"],
+  ["drawing pins","pinezki"],
+  ["fall behind with","mieć zaległości"],
+  ["fineliner pen","cienkopis"],
+  ["hole punch","dziurkacz"],
+  ["humanities","nauki humanistyczne"],
+  ["philosophy","filozofia"],
+  ["protractor","kątomierz"],
+  ["ring binder","segregator"],
+  ["set square","ekierka"],
+  ["skip school","opuszczać lekcje"],
+  ["stapler","zszywacz"],
+  ["STEM","przedmioty ścisłe"],
+  ["social studies","studia społeczne"],
+  ["be natural","mieć wrodzone zdolności"],
+  ["be your real self","bądź prawdziwym sobą"],
+  ["build rapport","budować relacje"],
+  ["capitalise on sth","skorzystać z czegoś"],
+  ["cultural identity","tożsamość kulturowa"],
+  ["fulfil your potential","wykorzystać swój potencjał"],
+  ["have strict self-control","mieć dobrą samokontrolę"],
+  ["identify with","identyfikować się z"],
+  ["multicultural","wielokulturowy"],
+  ["push your boundaries","przekraczaj swoje granice"],
+  ["self-esteem","poczucie własnej wartości"],
+  ["sense of belonging","poczucie przynależności"],
+  ["show leadership","wykazywać cechy przywódcze"],
+  ["social status","status społeczny"],
+  ["superior","lepszy ponad przeciętny"],
+  ["think outside the box","myśleć nieszablonowo"]
+];
+
+let mode = 'write';
+let direction = 'en-pl';
+let queue = [];
+let current = null;
+let currentIdx = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let totalDone = 0;
+let mistakesOnCurrent = 0;
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setTheme(t) {
+  document.body.className = t ? `theme-${t}` : '';
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  const map = {'':'t-dark','ocean':'t-ocean','forest':'t-forest','candy':'t-candy','sunset':'t-sunset'};
+  document.querySelector(`.${map[t]}`).classList.add('active');
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', i === (m === 'write' ? 0 : 1)));
+  document.getElementById('write-mode').style.display = m === 'write' ? 'block' : 'none';
+  document.getElementById('choice-mode').style.display = m === 'choice' ? 'block' : 'none';
+  restart();
+}
+
+function setDir(d) {
+  direction = d;
+  document.querySelectorAll('.dir-btn').forEach((b, i) => b.classList.toggle('active', (d === 'en-pl' ? 0 : 1) === i));
+  document.getElementById('dir-badge').textContent = d === 'en-pl' ? 'Angielski → Polski' : 'Polski → Angielski';
+  restart();
+}
+
+function restart() {
+  queue = shuffle(VOCAB);
+  currentIdx = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  totalDone = 0;
+  document.getElementById('complete-screen').classList.remove('show');
+  document.getElementById('question-card').style.display = 'block';
+  updateStats();
+  loadQuestion();
+}
+
+function getQuestion(pair) {
+  return direction === 'en-pl' ? pair[0] : pair[1];
+}
+function getAnswer(pair) {
+  return direction === 'en-pl' ? pair[1] : pair[0];
+}
+
+function loadQuestion() {
+  if (currentIdx >= queue.length) {
+    showComplete();
+    return;
+  }
+  current = queue[currentIdx];
+  mistakesOnCurrent = 0;
+  answered = false;
+
+  document.getElementById('question-text').textContent = getQuestion(current);
+  document.getElementById('q-counter').textContent = `${currentIdx + 1} / ${queue.length}`;
+  document.getElementById('next-btn').classList.remove('show');
+  document.getElementById('hints-row').innerHTML = '';
+  document.getElementById('hints-row-choice').innerHTML = '';
+
+  if (mode === 'write') {
+    const inp = document.getElementById('write-input');
+    inp.value = '';
+    inp.className = 'write-input';
+    inp.disabled = false;
+    inp.focus();
+    const fb = document.getElementById('write-feedback');
+    fb.className = 'feedback';
+    fb.querySelector('.feedback-icon').textContent = '';
+    fb.querySelector('.feedback-text').textContent = '';
+  } else {
+    loadChoices();
+    const fb = document.getElementById('choice-feedback');
+    fb.className = 'feedback';
+    fb.querySelector('.feedback-icon').textContent = '';
+    fb.querySelector('.feedback-text').textContent = '';
+  }
+  updateProgress();
+}
+
+function loadChoices() {
+  const answer = getAnswer(current);
+  const others = VOCAB.filter(p => p !== current);
+  const wrong3 = shuffle(others).slice(0, 3).map(p => getAnswer(p));
+  const options = shuffle([answer, ...wrong3]);
+  const grid = document.getElementById('choices-grid');
+  grid.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = opt;
+    btn.onclick = () => checkChoice(btn, opt, answer);
+    grid.appendChild(btn);
+  });
+}
+
+function normalize(s) {
+  return s.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function checkWrite() {
+  if (answered) return;
+  const inp = document.getElementById('write-input');
+  const val = normalize(inp.value);
+  const answer = getAnswer(current);
+  const correct = normalize(answer);
+
+  if (val === correct) {
+    inp.classList.add('correct');
+    inp.disabled = true;
+    showWriteFeedback(true, answer);
+    if (mistakesOnCurrent === 0) correctCount++;
+    answered = true;
+    totalDone++;
+    document.getElementById('next-btn').classList.add('show');
+  } else {
+    inp.classList.add('wrong');
+    wrongCount++;
+    mistakesOnCurrent++;
+    updateStats();
+    showWriteFeedback(false, answer);
+    revealHint('hints-row', answer, mistakesOnCurrent);
+    setTimeout(() => {
+      inp.classList.remove('wrong');
+      inp.value = '';
+      inp.focus();
+    }, 700);
+  }
+  updateStats();
+}
+
+function checkChoice(btn, selected, answer) {
+  if (answered) return;
+  const correct = normalize(answer);
+  const chosen = normalize(selected);
+  const allBtns = document.querySelectorAll('.choice-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (chosen === correct) {
+    btn.classList.add('correct-choice');
+    showChoiceFeedback(true, answer);
+    if (mistakesOnCurrent === 0) correctCount++;
+    answered = true;
+    totalDone++;
+    document.getElementById('next-btn').classList.add('show');
+  } else {
+    btn.classList.add('wrong-choice');
+    wrongCount++;
+    mistakesOnCurrent++;
+    showChoiceFeedback(false, answer);
+    revealHint('hints-row-choice', answer, mistakesOnCurrent);
+    // Highlight correct
+    allBtns.forEach(b => {
+      if (normalize(b.textContent) === correct) b.classList.add('correct-choice');
+    });
+    // Re-enable after short delay for retry? Actually for choice we show next button after wrong too
+    // Re-enable non-wrong ones
+    setTimeout(() => {
+      allBtns.forEach(b => {
+        if (!b.classList.contains('wrong-choice') && !b.classList.contains('correct-choice')) {
+          b.disabled = false;
+        }
+      });
+      answered = false;
+    }, 1000);
+  }
+  updateStats();
+}
+
+function revealHint(containerId, answer, mistakes) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const label = document.createElement('span');
+  label.className = 'hint-label';
+  label.textContent = `Podpowiedź:`;
+  container.appendChild(label);
+
+  const letters = answer.split('');
+  letters.forEach((ch, i) => {
+    const span = document.createElement('span');
+    if (i < mistakes) {
+      span.className = 'hint-letter';
+      span.textContent = ch === ' ' ? '·' : ch;
+    } else {
+      span.className = 'hint-letter';
+      span.style.opacity = '0.2';
+      span.textContent = ch === ' ' ? '·' : '_';
+    }
+    container.appendChild(span);
+  });
+}
+
+function showWriteFeedback(ok, answer) {
+  const fb = document.getElementById('write-feedback');
+  fb.className = 'feedback show ' + (ok ? 'correct-fb' : 'wrong-fb');
+  fb.querySelector('.feedback-icon').textContent = ok ? '✓' : '✗';
+  fb.querySelector('.feedback-text').innerHTML = ok
+    ? 'Świetnie! Poprawna odpowiedź!'
+    : `Błąd! Odpowiedź: <span class="correct-answer-text">${answer}</span>`;
+}
+
+function showChoiceFeedback(ok, answer) {
+  const fb = document.getElementById('choice-feedback');
+  fb.className = 'feedback show ' + (ok ? 'correct-fb' : 'wrong-fb');
+  fb.querySelector('.feedback-icon').textContent = ok ? '✓' : '✗';
+  fb.querySelector('.feedback-text').innerHTML = ok
+    ? 'Świetnie! Poprawna odpowiedź!'
+    : `Błąd! Poprawna: <span class="correct-answer-text">${answer}</span>`;
+}
+
+function nextQuestion() {
+  currentIdx++;
+  loadQuestion();
+}
+
+function updateStats() {
+  document.getElementById('stat-correct').textContent = correctCount;
+  document.getElementById('stat-wrong').textContent = wrongCount;
+  document.getElementById('stat-remain').textContent = queue.length - currentIdx;
+}
+
+function updateProgress() {
+  const pct = (currentIdx / queue.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function showComplete() {
+  document.getElementById('question-card').style.display = 'none';
+  const screen = document.getElementById('complete-screen');
+  screen.classList.add('show');
+  const pct = Math.round((correctCount / queue.length) * 100);
+  document.getElementById('final-score').textContent = pct + '%';
+  document.getElementById('final-correct').textContent = correctCount;
+  document.getElementById('final-total').textContent = queue.length;
+  if (pct >= 80) spawnConfetti();
+}
+
+function spawnConfetti() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  const colors = ['#ff6b6b','#ffd93d','#6bcb77','#64ffda','#e91e8c','#ff8c42'];
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.width = (Math.random() * 10 + 6) + 'px';
+    p.style.height = (Math.random() * 10 + 6) + 'px';
+    p.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    p.style.animationDelay = (Math.random() * 2) + 's';
+    wrap.appendChild(p);
+  }
+  setTimeout(() => wrap.innerHTML = '', 5000);
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('next-btn').classList.contains('show')) {
+      nextQuestion();
+    } else if (mode === 'write') {
+      checkWrite();
+    }
+  }
+});
+
+// Init
+restart();
+</script>
+</body>
+</html>
